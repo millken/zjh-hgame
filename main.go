@@ -11,6 +11,7 @@ import (
 func main() {
 	ws := gin.Default()
 	m := melody.New()
+	m.Upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
 	ws.GET("/", func(c *gin.Context) {
 		http.ServeFile(c.Writer, c.Request, "index.html")
@@ -20,15 +21,22 @@ func main() {
 		m.HandleRequest(c.Writer, c.Request)
 	})
 
+	m.HandleConnect(func(s *melody.Session) {
+		s.Write([]byte("[]"))
+	})
+	m.HandleDisconnect(func(s *melody.Session) {
+		m.BroadcastOthers([]byte("dis "), s)
+	})
 	m.HandleMessage(func(s *melody.Session, msg []byte) {
-		m.Broadcast(msg)
+		m.BroadcastOthers(msg, s)
 	})
 
-	ws.Run(":9030")
+	go ws.Run(":9030")
 
 	user := gin.Default()
 	user.POST("/user.reg", userReg)
 	user.POST("/user.login", userLogin)
+
 
 	suser := &http.Server{
 		Addr:           ":9020",
@@ -42,6 +50,7 @@ func main() {
 	dt := gin.Default()
 	dt.POST("/dt.sign", dtSign)
 	dt.POST("/dt.action", dtAction)
+	dt.POST("/dt.logs", dtLogs)
 
 	sdt := &http.Server{
 		Addr:           ":6020",
