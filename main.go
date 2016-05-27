@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	//gin.SetMode(gin.ReleaseMode)
 	ws := gin.Default()
 	m := melody.New()
 	m.Upgrader.CheckOrigin = func(r *http.Request) bool { return true }
@@ -37,7 +38,6 @@ func main() {
 	user.POST("/user.reg", userReg)
 	user.POST("/user.login", userLogin)
 
-
 	suser := &http.Server{
 		Addr:           ":9020",
 		Handler:        user,
@@ -59,5 +59,6 @@ func main() {
 		WriteTimeout:   5 * time.Second,
 		MaxHeaderBytes: 1 << 10,
 	}
+	initDb()
 	sdt.ListenAndServe()
 }
