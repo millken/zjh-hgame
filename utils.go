@@ -2,26 +2,35 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"strconv"
 	"time"
 )
 
+func randByte(n int) []byte {
+	b := make([]byte, n)
+	f, err := os.OpenFile("/dev/urandom", os.O_RDONLY, 0)
+	if err != nil {
+		_, err := rand.Read(b)
+		if err != nil {
+			log.Printf("[ERROR] rand.Read : %s", err)
+		}
+	} else {
+		f.Read(b)
+		f.Close()
+	}
+	return b
+}
 func guid() string {
-	f, _ := os.OpenFile("/dev/urandom", os.O_RDONLY, 0)
-	b := make([]byte, 16)
-	f.Read(b)
-	f.Close()
+	b := randByte(16)
 	uuid := fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
 	return uuid
 }
 
 func randToken() string {
-	f, _ := os.OpenFile("/dev/urandom", os.O_RDONLY, 0)
-	b := make([]byte, 18)
-	f.Read(b)
-	f.Close()
+	b := randByte(16)
 	return fmt.Sprintf("%x", b)
 }
 

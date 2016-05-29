@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/json"
 	"log"
-	"net/http"
 	"time"
+
+	"./common"
+	"./dt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,7 +38,9 @@ func dtSign(c *gin.Context) {
 //&ch=XX_02_001&ptype=页面&tkey=1100353a-a3cd-4dc8-b678-7a0b2d55af3c&sign=579eb4a9c36fc11cae22fb95b885c97c&param=[{"returnType":"payPolicy","requestId":1,"action":"/dt.conf"}]
 //验证不过 = 403
 func dtAction(c *gin.Context) {
-	var p []DtActionParam
+	var p []dt.ActionParam
+	var response gin.H
+	var responses []gin.H
 	c.Header("Access-Control-Allow-Origin", "*")
 	id := strToInt(c.Query("id"))
 	v := c.DefaultPostForm("v", "2.0")
@@ -57,9 +61,37 @@ func dtAction(c *gin.Context) {
 		c.JSON(200, gin.H{"status": 403})
 		return
 	}
+
+	session, err = common.NewSession(ghostId, hallToken)
+	if err != nil {
+		log.Printf("[ERROR] create session err: %s", err)
+		c.JSON(200, gin.H{"status": 500})
+		return
+	}
+
 	log.Printf("[DEBUG] param : %v", p)
-	message := `{}`
-	c.String(http.StatusOK, message)
+	for _, a := range p {
+		action, ok := dt.Actions[a.Action]
+		if !ok {
+			log.Printf("[ERROR] %s action not found", a.Action)
+			continue
+		}
+		param := dt.Param{
+			Ap:      a,
+			Db:      db,
+			Session: session,
+		}
+		act, _ := action(param)
+		response, _ = act.Response()
+		responses = append(responses, response)
+	}
+	data := gin.H{
+		"status":  200,
+		"data":    responses,
+		"cookies": []gin.H{},
+	}
+
+	c.JSON(200, data)
 }
 
 func dtLogs(c *gin.Context) {
