@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"./common"
-	"./dt"
+	"github.com/millken/zjh-hgame/common"
+	"github.com/millken/zjh-hgame/dt"
 
 	"github.com/gin-gonic/gin"
 )

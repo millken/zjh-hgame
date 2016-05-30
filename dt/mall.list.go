@@ -6,22 +6,22 @@ import (
 )
 
 func init() {
-	DtRegister("/room.userInfo", NewUserInfo)
+	DtRegister("/mall.list", NewMallList)
 }
 
-type UserInfo struct {
+type MallList struct {
 	ap ActionParam
 	db *sqlx.DB
 }
 
-func NewUserInfo(param Param) (Action, error) {
+func NewMallList(param Param) (Action, error) {
 	return &UserInfo{
 		ap: param.Ap,
 		db: param.Db,
 	}, nil
 }
 
-func (d *UserInfo) Response() (data gin.H, err error) {
+func (d *MallList) Response() (data gin.H, err error) {
 	data = gin.H{
 		"requestId": d.ap.RequestId,
 		"status":    200,

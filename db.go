@@ -5,7 +5,8 @@ import (
 
 	"gopkg.in/redis.v3"
 
-	"./common"
+	"github.com/millken/zjh-hgame/common"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 )
@@ -13,6 +14,7 @@ import (
 var db *sqlx.DB
 var redisclient *redis.Client
 var session *common.Session
+var cf *common.Config
 var err error
 
 var user = User{}
@@ -27,13 +29,13 @@ type User struct {
 
 func initDb() {
 	//db, err = sqlx.Connect("mysql", "root:123456@tcp(192.168.3.57:3306)/zjh")
-	db, err = sqlx.Connect("mysql", "root:password@tcp(127.0.0.1:3306)/zjh")
+	db, err = sqlx.Connect("mysql", cf.Server.Mysql)
 	if err != nil {
 		log.Fatalf("connect mysql server error: %s", err)
 	}
 
 	redisclient = redis.NewClient(&redis.Options{
-		Addr:     "192.168.0.114:6379",
+		Addr:     cf.Server.Redis,
 		Password: "",
 		DB:       0,
 	})

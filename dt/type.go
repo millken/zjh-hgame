@@ -1,9 +1,9 @@
 package dt
 
 import (
-	"../common"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
+	"github.com/millken/zjh-hgame/common"
 )
 
 type Action interface {
@@ -12,6 +12,7 @@ type Action interface {
 
 type ActionParam struct {
 	GameId     int `json:"gameId"`
+	RoomId     int `json:"roomId"`
 	RequestId  int `json:"requestId"`
 	Action     string
 	ReturnType string `json:"returnType"`

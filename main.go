@@ -1,15 +1,35 @@
 package main
 
 import (
+	"flag"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/millken/zjh-hgame/common"
 	"github.com/olahol/melody"
 )
 
 func main() {
-	//gin.SetMode(gin.ReleaseMode)
+	var mode string
+	c := flag.String("c", "config.toml", "config path")
+	flag.Parse()
+	cf, err = common.LoadConfig(*c)
+	if err != nil {
+		log.Fatalln("read config failed, err:", err)
+	}
+	switch cf.Server.Mode {
+	case "release":
+		mode = gin.ReleaseMode
+	case "debug":
+		mode = gin.DebugMode
+	case "test":
+		mode = gin.TestMode
+	default:
+		mode = gin.DebugMode
+	}
+	gin.SetMode(mode)
 	ws := gin.Default()
 	m := melody.New()
 	m.Upgrader.CheckOrigin = func(r *http.Request) bool { return true }
