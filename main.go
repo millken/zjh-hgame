@@ -30,15 +30,15 @@ func main() {
 		mode = gin.DebugMode
 	}
 	gin.SetMode(mode)
-	ws := gin.Default()
+	speakerServer := gin.Default()
 	m := melody.New()
 	m.Upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
-	ws.GET("/", func(c *gin.Context) {
+	speakerServer.GET("/", func(c *gin.Context) {
 		http.ServeFile(c.Writer, c.Request, "index.html")
 	})
 
-	ws.GET("/speaker", func(c *gin.Context) {
+	speakerServer.GET("/speaker", func(c *gin.Context) {
 		m.HandleRequest(c.Writer, c.Request)
 	})
 
@@ -49,10 +49,31 @@ func main() {
 		m.BroadcastOthers([]byte("dis "), s)
 	})
 	m.HandleMessage(func(s *melody.Session, msg []byte) {
+		log.Printf("[DEBUG] msg = %s", msg)
 		m.BroadcastOthers(msg, s)
 	})
 
-	go ws.Run(":9030")
+	go speakerServer.Run(":9030")
+
+	gameServer := gin.Default()
+	gsm := melody.New()
+	gsm.Upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+
+	gameServer.GET("/game", func(c *gin.Context) {
+		gsm.HandleRequest(c.Writer, c.Request)
+	})
+
+	gsm.HandleConnect(func(s *melody.Session) {
+		s.Write([]byte("[]"))
+	})
+	gsm.HandleDisconnect(func(s *melody.Session) {
+		gsm.BroadcastOthers([]byte("dis "), s)
+	})
+	gsm.HandleMessage(func(s *melody.Session, msg []byte) {
+		gsm.BroadcastOthers(msg, s)
+	})
+
+	go gameServer.Run(":8010")
 
 	user := gin.Default()
 	user.POST("/user.reg", userReg)

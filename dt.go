@@ -68,6 +68,7 @@ func dtAction(c *gin.Context) {
 		c.JSON(200, gin.H{"status": 500})
 		return
 	}
+	session.SetRedis(redisclient)
 
 	log.Printf("[DEBUG] param : %v", p)
 	for _, a := range p {

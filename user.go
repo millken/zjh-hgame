@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/millken/zjh-hgame/common"
 )
 
 func userReg(c *gin.Context) {
@@ -137,6 +138,13 @@ func userLogin(c *gin.Context) {
 	if user.VipLevel > 0 {
 		vip = 1
 	}
+	guid := guid()
+	token := randToken()
+	session, _ = common.NewSession(guid, token)
+	session.SetRedis(redisclient)
+	if err = session.Set("uid", id); err != nil {
+		log.Printf("[ERROR] set session err: %s", err)
+	}
 	c.JSON(200, gin.H{
 		"status": 200,
 		"data": gin.H{
@@ -156,13 +164,13 @@ func userLogin(c *gin.Context) {
 			gin.H{
 				"name":   "ghostId",
 				"path":   "/",
-				"value":  guid(),
+				"value":  guid,
 				"maxAge": 889032704,
 			},
 			gin.H{
 				"name":   "hallToken",
 				"path":   "/",
-				"value":  randToken(),
+				"value":  token,
 				"maxAge": 7776000,
 			},
 		},

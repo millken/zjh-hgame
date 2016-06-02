@@ -24,7 +24,7 @@ func (s *Session) SetRedis(client *redis.Client) error {
 }
 
 func (s *Session) Set(key string, value interface{}) error {
-	return s.client.Set(s.Key(key), value, 3600).Err()
+	return s.client.Set(s.Key(key), value, 0).Err()
 }
 
 func (s *Session) Get(key string) (interface{}, error) {

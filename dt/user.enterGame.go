@@ -11,7 +11,7 @@ type UserEnterGame struct {
 }
 
 func NewUserEnterGame(param Param) (Action, error) {
-	return &UserReconn{
+	return &UserEnterGame{
 		ap: param.Ap,
 	}, nil
 }
@@ -22,7 +22,7 @@ func (d *UserEnterGame) Response() (data gin.H, err error) {
 		"status":    200,
 		"action":    d.ap.Action,
 		"data": gin.H{
-			"gameServerUrl": "ws://123.59.85.45:8010/game",
+			"gameServerUrl": "ws://192.168.0.190:8010/game",
 			"type":          1,
 		},
 	}
