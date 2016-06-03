@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/millken/zjh-hgame/common"
+	"github.com/millken/zjh-hgame/gs"
 	"github.com/olahol/melody"
 )
 
@@ -55,6 +56,7 @@ func main() {
 
 	go speakerServer.Run(":9030")
 
+	gss := gs.NewServer()
 	gameServer := gin.Default()
 	gsm := melody.New()
 	gsm.Upgrader.CheckOrigin = func(r *http.Request) bool { return true }
@@ -63,15 +65,9 @@ func main() {
 		gsm.HandleRequest(c.Writer, c.Request)
 	})
 
-	gsm.HandleConnect(func(s *melody.Session) {
-		s.Write([]byte("[]"))
-	})
-	gsm.HandleDisconnect(func(s *melody.Session) {
-		gsm.BroadcastOthers([]byte("dis "), s)
-	})
-	gsm.HandleMessage(func(s *melody.Session, msg []byte) {
-		gsm.BroadcastOthers(msg, s)
-	})
+	gsm.HandleConnect(gss.Connect)
+	gsm.HandleDisconnect(gss.Disconnect)
+	gsm.HandleMessage(gss.Message)
 
 	go gameServer.Run(":8010")
 
