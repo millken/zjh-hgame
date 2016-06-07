@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/millken/zjh-hgame/common"
 	"github.com/millken/zjh-hgame/gs"
+	"github.com/millken/zjh-hgame/ss"
 	"github.com/olahol/melody"
 )
 
@@ -31,28 +32,22 @@ func main() {
 		mode = gin.DebugMode
 	}
 	gin.SetMode(mode)
+	sss := ss.NewServer()
 	speakerServer := gin.Default()
-	m := melody.New()
-	m.Upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	ssm := melody.New()
+	ssm.Upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
 	speakerServer.GET("/", func(c *gin.Context) {
 		http.ServeFile(c.Writer, c.Request, "index.html")
 	})
 
 	speakerServer.GET("/speaker", func(c *gin.Context) {
-		m.HandleRequest(c.Writer, c.Request)
+		ssm.HandleRequest(c.Writer, c.Request)
 	})
 
-	m.HandleConnect(func(s *melody.Session) {
-		s.Write([]byte("[]"))
-	})
-	m.HandleDisconnect(func(s *melody.Session) {
-		m.BroadcastOthers([]byte("dis "), s)
-	})
-	m.HandleMessage(func(s *melody.Session, msg []byte) {
-		log.Printf("[DEBUG] msg = %s", msg)
-		m.BroadcastOthers(msg, s)
-	})
+	ssm.HandleConnect(sss.Connect)
+	ssm.HandleDisconnect(sss.Disconnect)
+	ssm.HandleMessage(sss.Message)
 
 	go speakerServer.Run(":9030")
 

@@ -22,7 +22,7 @@ func (d *GameConf) Response() (data gin.H, err error) {
 		"status":    200,
 		"action":    d.ap.Action,
 		"data": gin.H{
-			"speakerServerUrl": "ws://127.0.0.1:9030/speaker",
+			"speakerServerUrl": "ws://192.168.0.190:9030/speaker",
 		},
 	}
 	return
