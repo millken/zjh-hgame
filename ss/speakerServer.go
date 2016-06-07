@@ -50,5 +50,4 @@ func (g *SpeakerServer) Message(s *melody.Session, msg []byte) {
 		log.Printf("[DEBUG] %+v", d[i])
 	}
 	s.Write([]byte(`[{"a":2,"b":1,"reqChatInterval":1000,"openChat":1,"minCoin":200000},{"a":6,"num1":0,"num2":0}]`))
-	//[{"a":4,"msgs":[{"msgType":1,"sourceType":1,"sourceName":"海海海","msg":"1钻石100元卖，95元收，加Q群112573524","uid":1188888,"type":1}]}]
 }
