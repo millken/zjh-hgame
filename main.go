@@ -32,6 +32,9 @@ func main() {
 		mode = gin.DebugMode
 	}
 	gin.SetMode(mode)
+
+	initDb()
+
 	sss := ss.NewServer()
 	speakerServer := gin.Default()
 	ssm := melody.New()
@@ -91,6 +94,5 @@ func main() {
 		WriteTimeout:   5 * time.Second,
 		MaxHeaderBytes: 1 << 10,
 	}
-	initDb()
 	sdt.ListenAndServe()
 }

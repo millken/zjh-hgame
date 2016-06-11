@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/millken/zjh-hgame/common"
+	"github.com/millken/zjh-hgame/rd"
 )
 
 func init() {
@@ -13,33 +14,27 @@ func init() {
 }
 
 type UserGameAuthorize struct {
-	ap      ActionParam
-	session *common.Session
+	ap    ActionParam
+	param Param
 }
 
 func NewUserGameAuthorize(param Param) (Action, error) {
 	return &UserGameAuthorize{
-		ap:      param.Ap,
-		session: param.Session,
+		ap:    param.Ap,
+		param: param,
 	}, nil
 }
 
 func (d *UserGameAuthorize) Response() (data gin.H, err error) {
 	var id int
-	uid, err := d.session.Get("uid")
-	if err != nil {
-		log.Printf("[ERROR] get session err: %s", err)
-	}
-	switch uid.(type) {
-	case string:
-		id = common.StrToInt(uid.(string))
-	case int:
-		id = uid.(int)
-	}
-	gameServerToken := fmt.Sprintf("%s-%d", common.Guid(), id)
-	if err = d.session.Set("gameServerToken", gameServerToken); err != nil {
+	hallToken := d.param.HallToken
+	id = rd.GetInt(fmt.Sprintf("hallToken:%s:uid", hallToken))
+	guid := common.Guid()
+	gameServerToken := fmt.Sprintf("%s-%d", guid, id)
+	if err = rd.Set(fmt.Sprintf("u:%d:gameServerToken", id), gameServerToken); err != nil {
 		log.Printf("[ERROR] set session[gameServerToken] err: %s", err)
 	}
+	rd.Set(fmt.Sprintf("u:%d:roomId", id), d.ap.RoomId)
 	data = gin.H{
 		"requestId": d.ap.RequestId,
 		"status":    200,

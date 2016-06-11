@@ -6,7 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/millken/zjh-hgame/common"
+	"github.com/millken/zjh-hgame/db"
+	"github.com/millken/zjh-hgame/rd"
 )
 
 func userReg(c *gin.Context) {
@@ -31,7 +32,7 @@ func userReg(c *gin.Context) {
 		c.JSON(200, gin.H{"status": 501})
 		return
 	}
-	user, err := getUserByUid(int(id))
+	user, err := db.GetUserByUid(int(id))
 	if err != nil {
 		log.Printf("[ERROR] userReg err: %s", err)
 	}
@@ -122,8 +123,9 @@ func userLogin(c *gin.Context) {
 	if err != nil {
 		id = 0
 	}
-	user, status, err := getUserByUidPassword(int(id), password)
+	user, status, err := db.GetUserByUidPassword(int(id), password)
 	if status == 0 { //user not exist
+		log.Printf("[ERROR] %s", err)
 		c.JSON(200, gin.H{"status": 406})
 		return
 	} else if status == -1 {
@@ -140,9 +142,7 @@ func userLogin(c *gin.Context) {
 	}
 	guid := guid()
 	token := randToken()
-	session, _ = common.NewSession(guid, token)
-	session.SetRedis(redisclient)
-	if err = session.Set("uid", id); err != nil {
+	if err = rd.SetUserToken(id, guid, token); err != nil {
 		log.Printf("[ERROR] set session err: %s", err)
 	}
 	c.JSON(200, gin.H{

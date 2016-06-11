@@ -5,7 +5,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/millken/zjh-hgame/common"
 	"github.com/millken/zjh-hgame/dt"
 
 	"github.com/gin-gonic/gin"
@@ -62,14 +61,6 @@ func dtAction(c *gin.Context) {
 		return
 	}
 
-	session, err = common.NewSession(ghostId, hallToken)
-	if err != nil {
-		log.Printf("[ERROR] create session err: %s", err)
-		c.JSON(200, gin.H{"status": 500})
-		return
-	}
-	session.SetRedis(redisclient)
-
 	log.Printf("[DEBUG] param : %v", p)
 	for _, a := range p {
 		action, ok := dt.Actions[a.Action]
@@ -78,9 +69,8 @@ func dtAction(c *gin.Context) {
 			continue
 		}
 		param := dt.Param{
-			Ap:      a,
-			Db:      db,
-			Session: session,
+			Ap:        a,
+			HallToken: hallToken,
 		}
 		act, _ := action(param)
 		response, _ = act.Response()

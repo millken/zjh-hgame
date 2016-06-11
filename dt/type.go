@@ -1,10 +1,6 @@
 package dt
 
-import (
-	"github.com/gin-gonic/gin"
-	"github.com/jmoiron/sqlx"
-	"github.com/millken/zjh-hgame/common"
-)
+import "github.com/gin-gonic/gin"
 
 type Action interface {
 	Response() (data gin.H, err error)
@@ -22,9 +18,8 @@ type ActionParam struct {
 }
 
 type Param struct {
-	Ap      ActionParam
-	Db      *sqlx.DB
-	Session *common.Session
+	Ap        ActionParam
+	HallToken string
 }
 
 var Actions = map[string]func(Param) (Action, error){}

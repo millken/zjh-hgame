@@ -1,9 +1,6 @@
 package dt
 
-import (
-	"github.com/gin-gonic/gin"
-	"github.com/jmoiron/sqlx"
-)
+import "github.com/gin-gonic/gin"
 
 func init() {
 	DtRegister("/mall.list", NewMallList)
@@ -11,13 +8,11 @@ func init() {
 
 type MallList struct {
 	ap ActionParam
-	db *sqlx.DB
 }
 
 func NewMallList(param Param) (Action, error) {
 	return &UserInfo{
 		ap: param.Ap,
-		db: param.Db,
 	}, nil
 }
 
